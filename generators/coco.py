@@ -74,7 +74,7 @@ class CocoGenerator(Generator):
         return len(self.image_ids)
 
     def num_classes(self):
-        """ Number of classes in the dataset. For COCO this is 80.
+        """ Number of classes in the dataset. For COCO this is 80, but coco has same gaps, maximum is 90.
         """
         return 90
 

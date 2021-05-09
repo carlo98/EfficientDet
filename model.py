@@ -52,7 +52,7 @@ def build_wBiFPN(features, num_channels, id, freeze_bn=False):
         P3_in = C3
         P4_in = C4
         P5_in = C5
-        P6_in = layers.Conv2D(num_channels, kernel_size=1, padding='same', name='resample_p6/conv2d')(C5)
+        P6_in = layers.Conv2D(num_channels, kernel_size=1, padding='same', name='resample_p6/conv2d')(P5_in)  # C5 to P5_in by us
         P6_in = layers.BatchNormalization(momentum=MOMENTUM, epsilon=EPSILON, name='resample_p6/bn')(P6_in)
         # P6_in = BatchNormalization(freeze=freeze_bn, name='resample_p6/bn')(P6_in)
         P6_in = layers.MaxPooling2D(pool_size=3, strides=2, padding='same', name='resample_p6/maxpool')(P6_in)
@@ -348,7 +348,7 @@ class BoxNet(models.Model):
         feature, level = inputs
         for i in range(self.depth):
             feature = self.convs[i](feature)
-            feature = self.bns[i][self.level](feature)
+            feature = self.bns[i][level](feature)
             feature = self.relu(feature)
         outputs = self.head(feature)
         outputs = self.reshape(outputs)
@@ -407,7 +407,7 @@ class ClassNet(models.Model):
         feature, level = inputs
         for i in range(self.depth):
             feature = self.convs[i](feature)
-            feature = self.bns[i][self.level](feature)
+            feature = self.bns[i][level](feature)
             feature = self.relu(feature)
         outputs = self.head(feature)
         outputs = self.reshape(outputs)
@@ -428,6 +428,7 @@ def efficientdet(phi, num_classes=20, num_anchors=9, weighted_bifpn=False, freez
     d_head = d_heads[phi]
     backbone_cls = backbones[phi]
     features = backbone_cls(input_tensor=image_input, freeze_bn=freeze_bn)
+    
     if weighted_bifpn:
         fpn_features = features
         for i in range(d_bifpn):
