@@ -22,6 +22,7 @@ class Generator(keras.utils.Sequence):
             group_method='random',  # one of 'none', 'random', 'ratio'
             shuffle_groups=True,
             detect_text=False,
+            preprocess=True,
             detect_quadrangle=False,
     ):
         """
@@ -33,6 +34,7 @@ class Generator(keras.utils.Sequence):
             shuffle_groups: If True, shuffles the groups each epoch.
             image_sizes:
         """
+        self.preprocess = preprocess
         self.misc_effect = misc_effect
         self.visual_effect = visual_effect
         self.batch_size = int(batch_size)
@@ -385,8 +387,9 @@ class Generator(keras.utils.Sequence):
         # randomly apply misc effect
         image_group, annotations_group = self.random_misc_group(image_group, annotations_group)
 
-        # perform preprocessing steps
-        image_group, annotations_group = self.preprocess_group(image_group, annotations_group)
+        if self.preprocess:
+            # perform preprocessing steps
+            image_group, annotations_group = self.preprocess_group(image_group, annotations_group)
 
         # check validity of annotations
         image_group, annotations_group = self.clip_transformed_annotations(image_group, annotations_group, group)
